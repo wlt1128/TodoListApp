@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TextInput, Button, Text, FlatList, TouchableOpacity, Image, Alert, location } from 'react-native';
+import { StyleSheet, View, TextInput, Button, Text, FlatList, TouchableOpacity, Image, Alert, Share } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Calendar } from 'react-native-calendars';
-import { useNavigation } from '@react-navigation/native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
 export default function TodoListScreen({ navigation }) {
   const [task, setTask] = useState('');
   const [tasks, setTasks] = useState([]);
@@ -72,9 +73,9 @@ export default function TodoListScreen({ navigation }) {
       { text: 'Cancel', style: 'cancel' },
     ]);
   };
-
+// 相机
   const takePhotoHandler = async () => {
-    // 确保已经获得相机权限
+    
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
     if (permissionResult.granted === false) {
       alert('You have refused to allow this app to access your camera!');
@@ -92,7 +93,7 @@ export default function TodoListScreen({ navigation }) {
       console.log('Photo taken, imageUri:', result.assets[0].uri);
     }
   };
-
+//相册
   const pickImageHandler = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -169,7 +170,25 @@ export default function TodoListScreen({ navigation }) {
     }));
   };
 
-  // 在这里输出每个任务项的详细信息
+
+  // 分享功能
+  const onShare = async () => {
+    try {
+      const result = await Share.share({
+        message: 'Check out this cool task I found in my Todo List App!',
+      });
+
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+        } else {
+        }
+      } else if (result.action === Share.dismissedAction) {
+      }
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+  // 修改
   const handleEdit = (id) => {
     const taskToEdit = tasks.find(task => task.id === id);
     setIsEditing(true);
@@ -205,9 +224,9 @@ export default function TodoListScreen({ navigation }) {
             onChangeText={(text) => setCurrentTask({ ...currentTask, text })}
             value={currentTask.text}
           />
-        <TouchableOpacity style={styles.customButton} onPress={handleSaveEdit}>
-          <Text style={styles.buttonText}>Save</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.customButton} onPress={handleSaveEdit}>
+            <Text style={styles.buttonText}>Save</Text>
+          </TouchableOpacity>
         </View>
       );
     } else {
@@ -225,19 +244,24 @@ export default function TodoListScreen({ navigation }) {
             </View>
           )}
 
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity onPress={() => handleEdit(item.id)} style={styles.touchableButton}>
-              <Text style={styles.buttonText}>Edit</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleDeleteTask(item.id)} style={styles.touchableButton}>
-              <Text style={styles.buttonText}>Delete</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleCompleteTask(item.id)} style={styles.touchableButton}>
-              <Text style={styles.buttonText}>{item.completed ? 'Mark as Incomplete' : 'Mark as Complete'}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={toggleCalendar} style={styles.touchableButton}>
-              <Text style={styles.buttonText}>Show Calendar</Text>
-            </TouchableOpacity>
+          <View style={styles.taskItem}>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity onPress={() => handleEdit(item.id)} style={styles.iconTouchableButton}>
+                <MaterialIcons name="edit" size={30} color="black" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleDeleteTask(item.id)} style={styles.iconTouchableButton}>
+                <MaterialIcons name="delete" size={30} color="black" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleCompleteTask(item.id)} style={styles.iconTouchableButton}>
+                <MaterialIcons name={item.completed ? "radio-button-unchecked" : "check-circle"} size={24} color="black" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={toggleCalendar} style={styles.iconTouchableButton}>
+                <MaterialIcons name="calendar-today" size={30} color="black" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => onShare()} style={styles.iconTouchableButton}>
+                <MaterialIcons name="share" size={30} color="black" />
+              </TouchableOpacity>
+            </View>
           </View>
           {showCalendar && (
             <Calendar
@@ -245,7 +269,7 @@ export default function TodoListScreen({ navigation }) {
             />
           )}
         </View>
-      );  
+      );
     }
   };
 
@@ -283,21 +307,21 @@ export default function TodoListScreen({ navigation }) {
 
 
       <View style={styles.filterContainer}>
-        <TouchableOpacity 
-          style={[styles.filterButton, filter === 'All' ? { backgroundColor: '#ba8888' } : {}]} 
-          onPress={() => setFilter('All')} 
+        <TouchableOpacity
+          style={[styles.filterButton, filter === 'All' ? { backgroundColor: '#ba8888' } : {}]}
+          onPress={() => setFilter('All')}
           activeOpacity={0.7}>
           <Text style={filter === 'All' ? styles.filterTextSelected : styles.filterText}>All</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.filterButton, filter === 'Active' ? { backgroundColor: '#ba8888' } : {}]} 
-          onPress={() => setFilter('Active')} 
+        <TouchableOpacity
+          style={[styles.filterButton, filter === 'Active' ? { backgroundColor: '#ba8888' } : {}]}
+          onPress={() => setFilter('Active')}
           activeOpacity={0.7}>
           <Text style={filter === 'Active' ? styles.filterTextSelected : styles.filterText}>Active</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.filterButton, filter === 'Completed' ? { backgroundColor: '#ba8888' } : {}]} 
-          onPress={() => setFilter('Completed')} 
+        <TouchableOpacity
+          style={[styles.filterButton, filter === 'Completed' ? { backgroundColor: '#ba8888' } : {}]}
+          onPress={() => setFilter('Completed')}
           activeOpacity={0.7}>
           <Text style={filter === 'Completed' ? styles.filterTextSelected : styles.filterText}>Completed</Text>
         </TouchableOpacity>
@@ -319,30 +343,30 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   inputContainer: {
-    flexDirection: 'column', // 切换为垂直布局
+    flexDirection: 'column',
     paddingHorizontal: 10,
     paddingVertical: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0', // 根据线框图底部边框颜色调整
+    borderBottomColor: '#e0e0e0',
   },
   imageAndButtonContainer: {
-    flexDirection: 'row', // 图片和按钮的水平布局
-    alignItems: 'center', // 垂直居中
-    justifyContent: 'space-between', // 两边对齐
-    paddingTop: 10, // 与输入框的间隔
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 10,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#d0d0d0', // 根据线框图文本框边框颜色调整
-    backgroundColor: '#ffffff', // 文本框背景色设为白色
+    borderColor: '#d0d0d0',
+    backgroundColor: '#ffffff',
     borderRadius: 5,
     padding: 10,
-    fontSize: 18, // 文本大小调整为适中
-    marginBottom: 10, // 添加一些底部边距
+    fontSize: 18,
+    marginBottom: 10,
   },
   buttonContainer1: {
-    flexDirection: 'column', // 按钮垂直排列
-    justifyContent: 'space-between', // 按钮之间的间隔
+    flexDirection: 'column',
+    justifyContent: 'space-between',
   },
   thumbnail: {
     width: 100,
@@ -354,19 +378,19 @@ const styles = StyleSheet.create({
 
   filterContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around', // 此属性确保所有子项之间的间距相等
+    justifyContent: 'space-around',
     paddingVertical: 10,
     backgroundColor: '#f8f8f8',
   },
   filterButton: {
-    flex: 1, // 这将确保每个按钮都平均占据空间
-    alignItems: 'center', // 将按钮文本居中对齐
-    
+    flex: 1,
+    alignItems: 'center',
+
   },
   filterText: {
     fontSize: 18,
     paddingVertical: 10,
-    paddingHorizontal: 5, // 可以根据需要调整，以适应屏幕大小
+    paddingHorizontal: 5,
     borderRadius: 5,
   },
   filterTextSelected: {
@@ -374,8 +398,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 5, // 同上
     borderRadius: 5,
-    backgroundColor: '#ba8888', // 被选中时的背景颜色
-    color: 'black', // 被选中时的文本颜色
+    backgroundColor: '#ba8888',
+    color: 'black',
   },
 
 
@@ -383,7 +407,7 @@ const styles = StyleSheet.create({
 
 
   taskItem: {
-    flexDirection: 'column', // 改为垂直布局
+    flexDirection: 'column',
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
@@ -395,27 +419,25 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   taskText: {
-    // 根据需要调整样式，确保与图片在同一行
     fontSize: 18,
     color: 'black',
-    flexShrink: 1, // 允许文本在必要时缩小
+    flexShrink: 1,
     marginRight: 10,
   },
   taskTextCompleted: {
-    // 同上，确保样式一致
     textDecorationLine: 'line-through',
     color: 'grey',
     flexShrink: 1,
     marginRight: 10,
   },
   image: {
-    // 调整图片大小以匹配线框图
+
     width: 150,
     height: 150,
     borderRadius: 5,
   },
   locationContainer: {
-    // 新增位置文本的容器
+
     marginTop: 5,
   },
   taskLocation: {
@@ -423,13 +445,13 @@ const styles = StyleSheet.create({
     color: 'grey',
   },
   buttonContainer: {
-    // 按钮容器样式调整
+
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10, // 在图片和按钮之间添加空间
+    marginTop: 10,
   },
   touchableButton: {
-    backgroundColor: '#d7b2b2', // 按钮背景颜色
+    backgroundColor: '#d7b2b2',
     padding: 10,
     marginTop: 5,
     borderRadius: 5,
@@ -439,28 +461,26 @@ const styles = StyleSheet.create({
 
 
 
-
-  // 新增自定义按钮样式
   customButton: {
-    backgroundColor: '#d7b2b2', // 你可以选择一个你喜欢的颜色
+    backgroundColor: '#d7b2b2',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 2, // 仅在安卓上显示阴影效果
+    elevation: 2,
     marginHorizontal: 5,
     marginTop: 10,
   },
   button: {
-    backgroundColor: '#d7b2b2', // 或者任何您想要的颜色
+    backgroundColor: '#d7b2b2',
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 20, // 圆角的大小，使按钮看起来更像是圆角的
-    marginVertical: 5, // 如果需要的话，您可以调整垂直间距
-    alignItems: 'center', // 文字居中对齐
-    justifyContent: 'center', // 在按钮内部垂直居中
-    minWidth: 100, // 按钮的最小宽度，根据您的布局需要进行调整
+    borderRadius: 20,
+    marginVertical: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 100,
   },
   buttonText: {
     color: '#333',
