@@ -58,4 +58,4 @@ This command will open a browser window with the Expo developer tools. You can t
 - **react-native-calendars**: Displays a calendar component within the app.
 - **react-native-vector-icons**: Utilized for incorporating icons within the application.
 
-Please note that `react-native-calendars` and `react-native-vector-icons` require additional setup. Refer to their official documentation for guidance.
+
